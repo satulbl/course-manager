@@ -14,18 +14,12 @@ func (s *Service) Update(ctx context.Context, user models.CurrentUser, id uuid.U
 		return fmt.Errorf("get course: %w", err)
 	}
 
-	if c.MentorId != in.MentorId {
-		if err := s.mentorExist(ctx, in.MentorId); err != nil {
-			return err
-		}
-	}
-
 	if err := c.Edit(in); err != nil {
 		return err
 	}
 
 	if err := s.courses.Update(ctx, c); err != nil {
-		return err
+		return fmt.Errorf("update course: %w", err)
 	}
 	return nil
 }

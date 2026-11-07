@@ -14,6 +14,7 @@ type Repositories struct {
 	Session SessionRepository
 	Token   TokenRepository
 	Course  CourseRepository
+	Lesson  LessonRepository
 }
 
 type UserRepository interface {
@@ -52,4 +53,11 @@ type CourseRepository interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*models.Course, error)
 	Update(ctx context.Context, c *models.Course) error
 	Delete(ctx context.Context, id uuid.UUID) error
+}
+
+type LessonRepository interface {
+	Create(ctx context.Context, l *models.Lesson) error
+	GetById(ctx context.Context, id uuid.UUID) (*models.Lesson, error)
+	List(ctx context.Context, limit, offset int) ([]models.Lesson, error)
+	Count(ctx context.Context) (int64, error)
 }

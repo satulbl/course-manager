@@ -7,21 +7,21 @@ import (
 	"github.com/google/uuid"
 )
 
-type CourseRequest struct {
+type courseRequest struct {
 	Title       string    `json:"title"`
 	Price       int       `json:"price"`
 	Description string    `json:"description"`
-	MentorId    uuid.UUID `json:"mentor_id"`
+	MentorID    uuid.UUID `json:"mentor_id"`
 	StartDate   time.Time `json:"startDate"`
 	EndDate     time.Time `json:"endDate"`
 }
 
-func (req *CourseRequest) toInput() models.CourseInput {
+func (req *courseRequest) toInput() models.CourseInput {
 	return models.CourseInput{
 		Title:       req.Title,
 		Description: req.Description,
 		Price:       req.Price,
-		MentorId:    req.MentorId,
+		MentorID:    req.MentorID,
 		StartDate:   req.StartDate,
 		EndDate:     req.EndDate,
 	}
@@ -33,7 +33,7 @@ type courseResponse struct {
 	Price       int       `json:"price"`
 	Description string    `json:"description"`
 	AuthorID    uuid.UUID `json:"authorId"`
-	MentorId    uuid.UUID `json:"mentorId"`
+	MentorID    uuid.UUID `json:"mentorID"`
 	StartDate   time.Time `json:"startDate"`
 	EndDate     time.Time `json:"endDate"`
 	CreatedAt   time.Time `json:"createdAt"`
@@ -42,8 +42,6 @@ type courseResponse struct {
 
 type coursesListResponse struct {
 	Courses    []courseResponse `json:"courses"`
-	Limit      int              `json:"limit"`
-	Offset     int              `json:"offset"`
 	TotalCount int64            `json:"totalCount"`
 }
 
@@ -54,7 +52,7 @@ func newCourseResponse(c *models.Course) courseResponse {
 		Price:       c.Price,
 		Description: c.Description,
 		AuthorID:    c.AuthorID,
-		MentorId:    c.MentorId,
+		MentorID:    c.MentorID,
 		StartDate:   c.StartDate,
 		EndDate:     c.EndDate,
 		CreatedAt:   c.CreatedAt,
@@ -62,7 +60,7 @@ func newCourseResponse(c *models.Course) courseResponse {
 	}
 }
 
-func newCourseListResponse(courses []models.Course, limit, offset int, total int64) coursesListResponse {
+func newCourseListResponse(courses []models.Course, total int64) coursesListResponse {
 	items := make([]courseResponse, 0, len(courses))
 	for _, c := range courses {
 		items = append(items, newCourseResponse(&c))
@@ -70,8 +68,6 @@ func newCourseListResponse(courses []models.Course, limit, offset int, total int
 
 	return coursesListResponse{
 		Courses:    items,
-		Limit:      limit,
-		Offset:     offset,
 		TotalCount: total,
 	}
 }

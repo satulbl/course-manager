@@ -9,6 +9,7 @@ import (
 	"course-manager/internal/pkg/redis"
 	"course-manager/internal/repository"
 	courserepo "course-manager/internal/repository/course"
+	lessonrepo "course-manager/internal/repository/lesson"
 	mentorrepo "course-manager/internal/repository/mentor"
 	sessionrepo "course-manager/internal/repository/session"
 	tokenrepo "course-manager/internal/repository/token"
@@ -16,6 +17,7 @@ import (
 	"course-manager/internal/service"
 	authservice "course-manager/internal/service/auth"
 	courseservice "course-manager/internal/service/course"
+	lessonservice "course-manager/internal/service/lesson"
 	userservice "course-manager/internal/service/user"
 	"errors"
 	"fmt"
@@ -101,12 +103,14 @@ func Run() (err error) {
 		Token:   tokenrepo.New(redisClient),
 		Course:  courserepo.New(postgresPool),
 		Mentor:  mentorrepo.New(postgresPool),
+		Lesson:  lessonrepo.New(postgresPool),
 	}
 
 	services := &service.Services{
 		Auth:   authservice.New(repos.User, repos.Session, repos.Token, jwtManager),
-		Course: courseservice.New(repos.Course, repos.Mentor),
+		Course: courseservice.New(repos.Course),
 		User:   userservice.New(repos.User),
+		Lesson: lessonservice.New(repos.Lesson),
 	}
 
 	server := &http.Server{

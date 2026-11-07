@@ -12,7 +12,7 @@ const (
 )
 
 func (h *Handler) CreateCourse(w http.ResponseWriter, r *http.Request) {
-	var req CourseRequest
+	var req courseRequest
 	if !httpx.DecodeJSON(w, r, &req) {
 		return
 	}
@@ -43,7 +43,7 @@ func (h *Handler) ListCourses(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpx.JSON(w, http.StatusOK, newCourseListResponse(courses, limit, offset, total))
+	httpx.JSON(w, http.StatusOK, newCourseListResponse(courses, total))
 }
 
 func (h *Handler) UpdateCourse(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +52,7 @@ func (h *Handler) UpdateCourse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req CourseRequest
+	var req courseRequest
 	if !httpx.DecodeJSON(w, r, &req) {
 		return
 	}

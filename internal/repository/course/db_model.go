@@ -13,7 +13,7 @@ type dbModel struct {
 	Price       int       `db:"price"`
 	Description string    `db:"description"`
 	AuthorID    uuid.UUID `db:"author_id"`
-	MentorId    uuid.UUID `db:"mentor_id"`
+	MentorID    uuid.UUID `db:"mentor_id"`
 	StartDate   time.Time `db:"start_date"`
 	EndDate     time.Time `db:"end_date"`
 	CreatedAt   time.Time `db:"created_at"`
@@ -27,7 +27,7 @@ func (m dbModel) toModel() models.Course {
 		Price:       m.Price,
 		Description: m.Description,
 		AuthorID:    m.AuthorID,
-		MentorId:    m.MentorId,
+		MentorID:    m.MentorID,
 		StartDate:   m.StartDate,
 		EndDate:     m.EndDate,
 		CreatedAt:   m.CreatedAt,

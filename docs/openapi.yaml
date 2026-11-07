@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Course Manager API
-  description: API регистрации, входа, обновления токенов и работы с курсами.
+  description: API регистрации, входа, обновления токенов и управления пользователями, курсами и уроками.
   version: 1.0.0
 
 paths:
@@ -123,6 +123,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/v1/users-list:
+    get:
+      operationId: listUsers
+      summary: Получить список пользователей
+      security:
+        - accessBearer: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Максимальное число пользователей в ответе. По умолчанию 20.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          description: Число пользователей, которое нужно пропустить. По умолчанию 0.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '400':
+          description: Некорректные параметры пагинации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Access-токен отсутствует, недействителен или истёк
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /api/v1/courses:
     get:
       operationId: listCourses
@@ -227,7 +277,7 @@ paths:
     put:
       operationId: updateCourse
       summary: Обновить курс
-      description: Курс может обновить его автор или пользователь с ролью admin.
+      description: Курс может обновить создавший его teacher или пользователь с ролью admin.
       security:
         - accessBearer: []
       parameters:
@@ -274,6 +324,198 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Курс не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      operationId: deleteCourse
+      summary: Удалить курс
+      description: Курс может удалить создавший его teacher или пользователь с ролью admin.
+      security:
+        - accessBearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID курса.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Курс удалён
+        '400':
+          description: Некорректный UUID курса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Access-токен отсутствует, недействителен или истёк
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Недостаточно прав для удаления курса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Курс не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/lessons:
+    get:
+      operationId: listLessons
+      summary: Получить список уроков
+      security:
+        - accessBearer: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Максимальное число уроков в ответе. По умолчанию 20; 0 допустим.
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          description: Число уроков, которое нужно пропустить. По умолчанию 0.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Список уроков
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LessonListResponse'
+        '400':
+          description: Некорректные параметры пагинации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Access-токен отсутствует, недействителен или истёк
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      operationId: createLesson
+      summary: Создать урок
+      description: Создавать уроки могут пользователи с ролью admin или teacher.
+      security:
+        - accessBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LessonRequest'
+            example:
+              title: Установка Go
+              description: Настройка окружения разработки
+              content: Инструкция по установке Go и настройке рабочего окружения.
+              lessonNumber: 1
+              courseId: 550e8400-e29b-41d4-a716-446655440000
+      responses:
+        '200':
+          description: Урок создан; в payload возвращается UUID урока
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LessonIDResponse'
+        '400':
+          description: Некорректное JSON-тело или данные не прошли валидацию
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Access-токен отсутствует, недействителен или истёк
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Недостаточно прав для создания урока
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/lessons/{id}:
+    get:
+      operationId: getLessonById
+      summary: Получить урок по ID
+      security:
+        - accessBearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID урока.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Данные урока
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LessonResponse'
+        '400':
+          description: Некорректный UUID урока
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Access-токен отсутствует, недействителен или истёк
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Урок не найден
           content:
             application/json:
               schema:
@@ -370,7 +612,7 @@ components:
           example: '2026-12-15T10:00:00Z'
     Course:
       type: object
-      required: [id, title, price, description, authorId, mentorId, startDate, endDate, createdAt, updatedAt]
+      required: [id, title, price, description, authorId, mentorID, startDate, endDate, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -389,7 +631,7 @@ components:
           type: string
           format: uuid
           example: 550e8400-e29b-41d4-a716-446655440002
-        mentorId:
+        mentorID:
           type: string
           format: uuid
           example: 550e8400-e29b-41d4-a716-446655440001
@@ -409,12 +651,124 @@ components:
           format: date-time
     CourseList:
       type: object
-      required: [courses, limit, offset, totalCount]
+      required: [courses, totalCount]
       properties:
         courses:
           type: array
           items:
             $ref: '#/components/schemas/Course'
+        totalCount:
+          type: integer
+          format: int64
+          description: Общее число курсов, не ограниченное limit и offset.
+          example: 42
+    LessonRequest:
+      type: object
+      required: [title, description, content, lessonNumber, courseId]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 80
+          example: Установка Go
+        description:
+          type: string
+          minLength: 1
+          maxLength: 150
+          example: Настройка окружения разработки
+        content:
+          type: string
+          minLength: 1
+          example: Инструкция по установке Go и настройке рабочего окружения.
+        lessonNumber:
+          type: integer
+          minimum: 1
+          example: 1
+        courseId:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+    Lesson:
+      type: object
+      required: [id, title, description, content, lessonNumber, course, mentor, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: Установка Go
+        description:
+          type: string
+          example: Настройка окружения разработки
+        content:
+          type: string
+          example: Инструкция по установке Go и настройке рабочего окружения.
+        lessonNumber:
+          type: integer
+          example: 1
+        course:
+          $ref: '#/components/schemas/LessonCourse'
+        mentor:
+          $ref: '#/components/schemas/LessonMentor'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    LessonCourse:
+      type: object
+      required: [id, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+    LessonMentor:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+    LessonListItem:
+      type: object
+      required: [id, title, description, lessonNumber]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        lessonNumber:
+          type: integer
+    LessonList:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LessonListItem'
+        total:
+          type: integer
+          format: int64
+          description: Общее число уроков, не ограниченное limit и offset.
+          example: 42
+    UserList:
+      type: object
+      required: [users, limit, offset, totalCount]
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
         limit:
           type: integer
           example: 20
@@ -424,7 +778,7 @@ components:
         totalCount:
           type: integer
           format: int64
-          description: Общее число курсов, не ограниченное limit и offset.
+          description: Общее число пользователей, не ограниченное limit и offset.
           example: 42
     User:
       type: object
@@ -484,6 +838,31 @@ components:
       properties:
         payload:
           $ref: '#/components/schemas/CourseList'
+    LessonIDResponse:
+      type: object
+      required: [payload]
+      properties:
+        payload:
+          type: string
+          format: uuid
+    LessonResponse:
+      type: object
+      required: [payload]
+      properties:
+        payload:
+          $ref: '#/components/schemas/Lesson'
+    LessonListResponse:
+      type: object
+      required: [payload]
+      properties:
+        payload:
+          $ref: '#/components/schemas/LessonList'
+    UserListResponse:
+      type: object
+      required: [payload]
+      properties:
+        payload:
+          $ref: '#/components/schemas/UserList'
     EmptyResponse:
       type: object
       example: {}

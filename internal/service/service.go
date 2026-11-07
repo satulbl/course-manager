@@ -11,6 +11,7 @@ type Services struct {
 	Auth   AuthService
 	Course CourseService
 	User   UserService
+	Lesson LessonService
 }
 
 type AuthService interface {
@@ -30,4 +31,10 @@ type CourseService interface {
 type UserService interface {
 	GetById(ctx context.Context, id uuid.UUID) (*models.User, error)
 	List(ctx context.Context, limit, offset int) ([]models.User, int64, error)
+}
+
+type LessonService interface {
+	Create(ctx context.Context, user models.CurrentUser, in models.LessonInput) (uuid.UUID, error)
+	List(ctx context.Context, limit, offset int) ([]models.Lesson, int64, error)
+	GetById(ctx context.Context, id uuid.UUID) (*models.Lesson, error)
 }

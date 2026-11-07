@@ -15,34 +15,18 @@ type Course struct {
 	Price       int
 	Description string
 	AuthorID    uuid.UUID
-	MentorId    uuid.UUID
+	MentorID    uuid.UUID
 	StartDate   time.Time
 	EndDate     time.Time
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
 
-func (c *Course) Edit(in CourseInput) error {
-	if err := in.Validate(); err != nil {
-		return fmt.Errorf("edit course: %w", err)
-	}
-
-	c.Title = in.Title
-	c.Price = in.Price
-	c.Description = in.Description
-	c.MentorId = in.MentorId
-	c.StartDate = in.StartDate
-	c.EndDate = in.EndDate
-	c.UpdatedAt = time.Now().UTC()
-
-	return nil
-}
-
 type CourseInput struct {
 	Title       string
 	Price       int
 	Description string
-	MentorId    uuid.UUID
+	MentorID    uuid.UUID
 	StartDate   time.Time
 	EndDate     time.Time
 }
@@ -71,7 +55,7 @@ func (in *CourseInput) Validate() error {
 	if in.Price < 0 {
 		return fmt.Errorf("%w: price must not be negative", ErrInvalidInput)
 	}
-	if in.MentorId == uuid.Nil {
+	if in.MentorID == uuid.Nil {
 		return fmt.Errorf("%w: mentor id is required", ErrInvalidInput)
 	}
 	if in.StartDate.IsZero() || in.EndDate.IsZero() {
@@ -80,5 +64,21 @@ func (in *CourseInput) Validate() error {
 	if in.EndDate.Before(in.StartDate) {
 		return fmt.Errorf("%w: end date must not be before start date", ErrInvalidInput)
 	}
+	return nil
+}
+
+func (c *Course) Edit(in CourseInput) error {
+	if err := in.Validate(); err != nil {
+		return fmt.Errorf("edit course: %w", err)
+	}
+
+	c.Title = in.Title
+	c.Price = in.Price
+	c.Description = in.Description
+	c.MentorID = in.MentorID
+	c.StartDate = in.StartDate
+	c.EndDate = in.EndDate
+	c.UpdatedAt = time.Now().UTC()
+
 	return nil
 }

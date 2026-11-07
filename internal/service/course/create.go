@@ -22,18 +22,13 @@ func (s *Service) Create(ctx context.Context, user models.CurrentUser, in models
 		Description: in.Description,
 		Price:       in.Price,
 		AuthorID:    user.ID,
-		MentorId:    in.MentorId,
+		MentorID:    in.MentorID,
 		StartDate:   in.StartDate,
 		EndDate:     in.EndDate,
-	}
-
-	if err := s.mentorExist(ctx, in.MentorId); err != nil {
-		return err
 	}
 
 	if err := s.courses.Create(ctx, course); err != nil {
 		return fmt.Errorf("create course: %w", err)
 	}
-
 	return nil
 }
