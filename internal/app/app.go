@@ -10,15 +10,17 @@ import (
 	"course-manager/internal/repository"
 	courserepo "course-manager/internal/repository/course"
 	lessonrepo "course-manager/internal/repository/lesson"
-	mentorrepo "course-manager/internal/repository/mentor"
+	// mentorrepo "course-manager/internal/repository/mentor"
 	sessionrepo "course-manager/internal/repository/session"
 	tokenrepo "course-manager/internal/repository/token"
 	userrepo "course-manager/internal/repository/user"
+	usercourserepo "course-manager/internal/repository/user_course"
 	"course-manager/internal/service"
 	authservice "course-manager/internal/service/auth"
 	courseservice "course-manager/internal/service/course"
 	lessonservice "course-manager/internal/service/lesson"
 	userservice "course-manager/internal/service/user"
+	usercourseservice "course-manager/internal/service/user-course"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -98,19 +100,21 @@ func Run() (err error) {
 	}
 
 	repos := &repository.Repositories{
-		User:    userrepo.New(postgresPool),
-		Session: sessionrepo.New(postgresPool),
-		Token:   tokenrepo.New(redisClient),
-		Course:  courserepo.New(postgresPool),
-		Mentor:  mentorrepo.New(postgresPool),
-		Lesson:  lessonrepo.New(postgresPool),
+		User:       userrepo.New(postgresPool),
+		Session:    sessionrepo.New(postgresPool),
+		Token:      tokenrepo.New(redisClient),
+		Course:     courserepo.New(postgresPool),
+		// Mentor:     mentorrepo.New(postgresPool),
+		Lesson:     lessonrepo.New(postgresPool),
+		UserCourse: usercourserepo.New(postgresPool),
 	}
 
 	services := &service.Services{
-		Auth:   authservice.New(repos.User, repos.Session, repos.Token, jwtManager),
-		Course: courseservice.New(repos.Course),
-		User:   userservice.New(repos.User),
-		Lesson: lessonservice.New(repos.Lesson),
+		Auth:       authservice.New(repos.User, repos.Session, repos.Token, jwtManager),
+		Course:     courseservice.New(repos.Course),
+		User:       userservice.New(repos.User),
+		Lesson:     lessonservice.New(repos.Lesson),
+		UserCourse: usercourseservice.New(repos.UserCourse),
 	}
 
 	server := &http.Server{

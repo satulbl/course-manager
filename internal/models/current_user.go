@@ -21,3 +21,7 @@ func (u CurrentUser) CanEditCourse(authorID uuid.UUID) bool {
 	return u.ID == authorID && u.RoleID == RoleTeacher || u.RoleID == RoleAdmin
 }
 
+func (u CurrentUser) IsAdmin() bool {
+	return u.RoleID == RoleAdmin
+}
+

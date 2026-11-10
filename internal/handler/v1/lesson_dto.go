@@ -25,14 +25,6 @@ func (l *lessonRequest) toInput() models.LessonInput {
 	}
 }
 
-type createLessonResponse struct {
-	ID uuid.UUID `json:"id"`
-}
-
-func newCreateLessonResponse(id uuid.UUID) createLessonResponse {
-	return createLessonResponse{ID: id}
-}
-
 type lessonCourseResponse struct {
 	ID    uuid.UUID `json:"id"`
 	Title string    `json:"title"`

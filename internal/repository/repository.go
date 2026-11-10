@@ -9,12 +9,13 @@ import (
 )
 
 type Repositories struct {
-	User    UserRepository
-	Mentor  MentorRepository
-	Session SessionRepository
-	Token   TokenRepository
-	Course  CourseRepository
-	Lesson  LessonRepository
+	User       UserRepository
+	Mentor     MentorRepository
+	Session    SessionRepository
+	Token      TokenRepository
+	Course     CourseRepository
+	Lesson     LessonRepository
+	UserCourse UserCourseRepository
 }
 
 type UserRepository interface {
@@ -60,4 +61,10 @@ type LessonRepository interface {
 	GetById(ctx context.Context, id uuid.UUID) (*models.Lesson, error)
 	List(ctx context.Context, limit, offset int) ([]models.Lesson, error)
 	Count(ctx context.Context) (int64, error)
+}
+
+type UserCourseRepository interface {
+	GetUserCourses(ctx context.Context, f models.UserCourseFilter) ([]models.UserCourse, error)
+	Create(ctx context.Context, uc *models.UserCourse) error
+	Approve(ctx context.Context, id uuid.UUID) error
 }

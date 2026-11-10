@@ -19,10 +19,10 @@ func (h *Handler) CreateLesson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpx.JSON(w, http.StatusOK, newCreateLessonResponse(id))
+	httpx.JSON(w, http.StatusOK, newSimpleIdResponse(id))
 }
 
-func (h *Handler) GetLessonById(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) LessonById(w http.ResponseWriter, r *http.Request) {
 	id, ok := httpx.ParseID(w, r)
 	if !ok {
 		return

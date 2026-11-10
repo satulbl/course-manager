@@ -4,6 +4,10 @@ info:
   description: API регистрации, входа, обновления токенов и управления пользователями, курсами и уроками.
   version: 1.0.0
 
+servers:
+  - url: http://localhost:8080
+    description: Локальный сервер
+
 paths:
   /api/v1/auth/register:
     post:
@@ -65,8 +69,8 @@ paths:
             schema:
               $ref: '#/components/schemas/LoginRequest'
             example:
-              email: user@example.com
-              password: securePassword123
+              email: user2@example.com
+              password: password123
       responses:
         '200':
           description: Вход выполнен
@@ -455,7 +459,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LessonIDResponse'
+                $ref: '#/components/schemas/SimpleIDResponse'
         '400':
           description: Некорректное JSON-тело или данные не прошли валидацию
           content:
@@ -516,6 +520,154 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Урок не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/user-courses:
+    get:
+      operationId: listUserCourses
+      summary: Получить записи пользователя на курсы
+      description: Для запроса без фильтров требуется роль admin.
+      security:
+        - accessBearer: []
+      parameters:
+        - name: userId
+          in: query
+          required: false
+          description: Необязательный фильтр по UUID пользователя.
+          schema:
+            type: string
+            format: uuid
+        - name: approved
+          in: query
+          required: false
+          description: Фильтр по статусу одобрения записи.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Записи пользователя на курсы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCoursesResponse'
+        '400':
+          description: Некорректный userId или значение approved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Access-токен отсутствует, недействителен или истёк
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Для запроса без фильтров требуется роль admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      operationId: createUserCourse
+      summary: Записать пользователя на курс
+      security:
+        - accessBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCourseRequest'
+            example:
+              userId: 550e8400-e29b-41d4-a716-446655440002
+              courseId: 550e8400-e29b-41d4-a716-446655440000
+      responses:
+        '200':
+          description: Запись создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleIDResponse'
+        '400':
+          description: Некорректное JSON-тело, отсутствуют ID или пользователь/курс не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Access-токен отсутствует, недействителен или истёк
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Пользователь уже записан на этот курс
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/user-courses/{id}:
+    patch:
+      operationId: approveUserCourse
+      summary: Одобрить запись на курс
+      description: Одобрять записи могут только пользователи с ролью admin.
+      security:
+        - accessBearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID записи пользователя на курс.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Запись одобрена
+        '400':
+          description: Некорректный UUID записи
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Access-токен отсутствует, недействителен или истёк
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Недостаточно прав для одобрения записи
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Запись не найдена
           content:
             application/json:
               schema:
@@ -761,6 +913,52 @@ components:
           format: int64
           description: Общее число уроков, не ограниченное limit и offset.
           example: 42
+    UserCourseRequest:
+      type: object
+      required: [userId, courseId]
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: UUID пользователя, которого нужно записать на курс.
+        courseId:
+          type: string
+          format: uuid
+          description: UUID курса.
+    UserCourse:
+      type: object
+      required: [id, user, course, isApproved]
+      properties:
+        id:
+          type: string
+          format: uuid
+        user:
+          $ref: '#/components/schemas/ApplicationUser'
+        course:
+          $ref: '#/components/schemas/ApplicationCourse'
+        isApproved:
+          type: boolean
+    ApplicationUser:
+      type: object
+      required: [id, name, email]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+    ApplicationCourse:
+      type: object
+      required: [id, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
     UserList:
       type: object
       required: [users, limit, offset, totalCount]
@@ -838,13 +1036,6 @@ components:
       properties:
         payload:
           $ref: '#/components/schemas/CourseList'
-    LessonIDResponse:
-      type: object
-      required: [payload]
-      properties:
-        payload:
-          type: string
-          format: uuid
     LessonResponse:
       type: object
       required: [payload]
@@ -857,6 +1048,25 @@ components:
       properties:
         payload:
           $ref: '#/components/schemas/LessonList'
+    UserCoursesResponse:
+      type: object
+      required: [payload]
+      properties:
+        payload:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserCourse'
+    SimpleIDResponse:
+      type: object
+      required: [payload]
+      properties:
+        payload:
+          type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+              format: uuid
     UserListResponse:
       type: object
       required: [payload]

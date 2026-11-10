@@ -8,10 +8,11 @@ import (
 )
 
 type Services struct {
-	Auth   AuthService
-	Course CourseService
-	User   UserService
-	Lesson LessonService
+	Auth       AuthService
+	Course     CourseService
+	User       UserService
+	Lesson     LessonService
+	UserCourse UserCoursesService
 }
 
 type AuthService interface {
@@ -37,4 +38,10 @@ type LessonService interface {
 	Create(ctx context.Context, user models.CurrentUser, in models.LessonInput) (uuid.UUID, error)
 	List(ctx context.Context, limit, offset int) ([]models.Lesson, int64, error)
 	GetById(ctx context.Context, id uuid.UUID) (*models.Lesson, error)
+}
+
+type UserCoursesService interface {
+	GetUserCourses(ctx context.Context, user models.CurrentUser, f models.UserCourseFilter) ([]models.UserCourse, error)
+	Create(ctx context.Context, in models.UserCourseInput) (uuid.UUID, error)
+	Approve(ctx context.Context, user models.CurrentUser, id uuid.UUID) error
 }
