@@ -54,6 +54,8 @@ func ServiceError(w http.ResponseWriter, r *http.Request, err error) {
 		Error(w, r, http.StatusNotFound, models.ErrNotFound.Error(), err)
 	case errors.Is(err, models.ErrForbidden):
 		Error(w, r, http.StatusForbidden, models.ErrForbidden.Error(), err)
+	case errors.Is(err, models.ErrCourseNotApproved):
+		Error(w, r, http.StatusForbidden, models.ErrCourseNotApproved.Error(), err)
 	case errors.Is(err, models.ErrFileTooLarge):
 		Error(w, r, http.StatusRequestEntityTooLarge, models.ErrFileTooLarge.Error(), err)
 	case errors.Is(err, models.ErrUnsupportedFileType):
@@ -64,10 +66,16 @@ func ServiceError(w http.ResponseWriter, r *http.Request, err error) {
 		Error(w, r, http.StatusConflict, models.ErrLessonNumberTaken.Error(), err)
 	case errors.Is(err, models.ErrCourseNotFound):
 		Error(w, r, http.StatusBadRequest, models.ErrCourseNotFound.Error(), err)
+	case errors.Is(err, models.ErrLessonNotFound):
+		Error(w, r, http.StatusBadRequest, models.ErrLessonNotFound.Error(), err)
 	case errors.Is(err, models.ErrUserNotFound):
 		Error(w, r, http.StatusBadRequest, models.ErrUserNotFound.Error(), err)
 	case errors.Is(err, models.ErrUserAlreadyEnrolled):
 		Error(w, r, http.StatusConflict, models.ErrUserAlreadyEnrolled.Error(), err)
+	case errors.Is(err, models.ErrUserAlreadyStartedLesson):
+		Error(w, r, http.StatusConflict, models.ErrUserAlreadyStartedLesson.Error(), err)
+	case errors.Is(err, models.ErrAlreadyCompleted):
+		Error(w, r, http.StatusConflict, models.ErrAlreadyCompleted.Error(), err)
 	case errors.Is(err, models.ErrAuthorNotFound):
 		Error(w, r, http.StatusBadRequest, models.ErrAuthorNotFound.Error(), err)
 	case errors.Is(err, models.ErrMentorNotFound):

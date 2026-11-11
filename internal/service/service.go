@@ -12,7 +12,8 @@ type Services struct {
 	Course     CourseService
 	User       UserService
 	Lesson     LessonService
-	UserCourse UserCoursesService
+	UserCourse UserCourseService
+	UserLesson UserLessonService
 }
 
 type AuthService interface {
@@ -40,8 +41,13 @@ type LessonService interface {
 	GetById(ctx context.Context, id uuid.UUID) (*models.Lesson, error)
 }
 
-type UserCoursesService interface {
+type UserCourseService interface {
 	GetUserCourses(ctx context.Context, user models.CurrentUser, f models.UserCourseFilter) ([]models.UserCourse, error)
 	Create(ctx context.Context, in models.UserCourseInput) (uuid.UUID, error)
 	Approve(ctx context.Context, user models.CurrentUser, id uuid.UUID) error
+}
+
+type UserLessonService interface {
+	Create(ctx context.Context, userId uuid.UUID, in models.UserLessonInput) (uuid.UUID, error)
+	Complete(ctx context.Context, user models.CurrentUser, id uuid.UUID) error
 }

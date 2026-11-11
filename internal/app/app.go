@@ -10,6 +10,8 @@ import (
 	"course-manager/internal/repository"
 	courserepo "course-manager/internal/repository/course"
 	lessonrepo "course-manager/internal/repository/lesson"
+	userlessonrepo "course-manager/internal/repository/user_lesson"
+
 	// mentorrepo "course-manager/internal/repository/mentor"
 	sessionrepo "course-manager/internal/repository/session"
 	tokenrepo "course-manager/internal/repository/token"
@@ -20,7 +22,8 @@ import (
 	courseservice "course-manager/internal/service/course"
 	lessonservice "course-manager/internal/service/lesson"
 	userservice "course-manager/internal/service/user"
-	usercourseservice "course-manager/internal/service/user-course"
+	usercourseservice "course-manager/internal/service/user_course"
+	userlessonservice "course-manager/internal/service/user_lesson"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -100,13 +103,14 @@ func Run() (err error) {
 	}
 
 	repos := &repository.Repositories{
-		User:       userrepo.New(postgresPool),
-		Session:    sessionrepo.New(postgresPool),
-		Token:      tokenrepo.New(redisClient),
-		Course:     courserepo.New(postgresPool),
+		User:    userrepo.New(postgresPool),
+		Session: sessionrepo.New(postgresPool),
+		Token:   tokenrepo.New(redisClient),
+		Course:  courserepo.New(postgresPool),
 		// Mentor:     mentorrepo.New(postgresPool),
 		Lesson:     lessonrepo.New(postgresPool),
 		UserCourse: usercourserepo.New(postgresPool),
+		UserLesson: userlessonrepo.New(postgresPool),
 	}
 
 	services := &service.Services{
@@ -115,6 +119,7 @@ func Run() (err error) {
 		User:       userservice.New(repos.User),
 		Lesson:     lessonservice.New(repos.Lesson),
 		UserCourse: usercourseservice.New(repos.UserCourse),
+		UserLesson: userlessonservice.New(repos.UserLesson),
 	}
 
 	server := &http.Server{

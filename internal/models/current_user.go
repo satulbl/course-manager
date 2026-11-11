@@ -5,9 +5,12 @@ import "github.com/google/uuid"
 // CurrentUser — пользователь, который выполняет запрос. Берётся из access-токена.
 // Все правила прав — методы CurrentUser.
 type CurrentUser struct {
-	ID       uuid.UUID
+	ID        uuid.UUID
 	RoleID    int64
 	SessionID string
+}
+func (u CurrentUser) IsAdmin() bool {
+	return u.RoleID == RoleAdmin
 }
 
 func (u CurrentUser) CanCreate() bool {
@@ -21,7 +24,6 @@ func (u CurrentUser) CanEditCourse(authorID uuid.UUID) bool {
 	return u.ID == authorID && u.RoleID == RoleTeacher || u.RoleID == RoleAdmin
 }
 
-func (u CurrentUser) IsAdmin() bool {
-	return u.RoleID == RoleAdmin
+func (u CurrentUser) CanCompleteLesson(userId uuid.UUID) bool {
+	return u.ID == userId || u.IsAdmin()
 }
-

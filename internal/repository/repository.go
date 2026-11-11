@@ -16,6 +16,7 @@ type Repositories struct {
 	Course     CourseRepository
 	Lesson     LessonRepository
 	UserCourse UserCourseRepository
+	UserLesson UserLessonRepository
 }
 
 type UserRepository interface {
@@ -67,4 +68,10 @@ type UserCourseRepository interface {
 	GetUserCourses(ctx context.Context, f models.UserCourseFilter) ([]models.UserCourse, error)
 	Create(ctx context.Context, uc *models.UserCourse) error
 	Approve(ctx context.Context, id uuid.UUID) error
+}
+
+type UserLessonRepository interface {
+	Create(ctx context.Context, ul *models.UserLesson) error
+	Complete(ctx context.Context, id uuid.UUID) error
+	GetById(ctx context.Context, id uuid.UUID) (*models.UserLesson, error)
 }

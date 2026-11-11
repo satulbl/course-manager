@@ -5,7 +5,7 @@ import (
 	"course-manager/internal/service"
 )
 
-var _ service.UserCoursesService = (*Service)(nil)
+var _ service.UserCourseService = (*Service)(nil)
 
 type Service struct {
 	userCourses repository.UserCourseRepository

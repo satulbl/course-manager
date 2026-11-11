@@ -37,6 +37,9 @@ func NewRouter(services *service.Services) http.Handler {
 	mux.Handle("POST /api/v1/user-courses", protected(api.CreateUserCourse))
 	mux.Handle("PATCH /api/v1/user-courses/{id}", protected(api.ApproveUserCourse))
 
+	mux.Handle("POST /api/v1/lesson/start", protected(api.StartUserLesson))
+	mux.Handle("PATCH /api/v1/lesson/complete/{id}", protected(api.CompleteUserLesson))
+
 	// Logging снаружи: он видит и ответ 500, который отдаст Recover после паники.
 	return middleware.Logging(middleware.Recover(mux))
 }

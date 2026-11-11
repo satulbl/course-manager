@@ -531,6 +531,112 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/v1/lesson/start:
+    post:
+      operationId: startUserLesson
+      summary: Начать урок
+      security:
+        - accessBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLessonRequest'
+            example:
+              lessonId: 550e8400-e29b-41d4-a716-446655440003
+      responses:
+        '200':
+          description: Урок начат; в payload возвращается UUID записи пользователя об уроке
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleIDResponse'
+        '400':
+          description: Некорректное JSON-тело, lessonId или указанный урок не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Access-токен отсутствует, недействителен или истёк
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Курс не одобрен для пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Пользователь уже начал этот урок
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/lesson/complete/{id}:
+    patch:
+      operationId: completeUserLesson
+      summary: Завершить урок
+      security:
+        - accessBearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID записи пользователя об уроке, возвращённый при начале урока.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Урок завершён
+        '400':
+          description: Некорректный UUID записи пользователя об уроке
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Access-токен отсутствует, недействителен или истёк
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Недостаточно прав для завершения урока
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Запись пользователя об уроке не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Урок уже завершён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /api/v1/user-courses:
     get:
       operationId: listUserCourses
@@ -925,6 +1031,15 @@ components:
           type: string
           format: uuid
           description: UUID курса.
+    UserLessonRequest:
+      type: object
+      required: [lessonId]
+      properties:
+        lessonId:
+          type: string
+          format: uuid
+          description: UUID урока, который пользователь начинает.
+          example: 550e8400-e29b-41d4-a716-446655440003
     UserCourse:
       type: object
       required: [id, user, course, isApproved]
